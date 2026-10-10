@@ -1,0 +1,73 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'rajusurna18@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // User Profile Rules
+    match /users/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isOwner(userId) && isValidId(userId) &&
+        request.resource.data.keys().hasAll(['id', 'email', 'name', 'role', 'targetRole']) &&
+        request.resource.data.role == 'student'; // Prevent self-elevation to admin
+      allow update: if (isOwner(userId) || isAdmin()) &&
+        request.resource.data.id == resource.data.id &&
+        request.resource.data.role == resource.data.role; // Immutable role
+      allow delete: if isAdmin();
+    }
+
+    // Assessment Attempts Rules (Immutable creation, no client update)
+    match /attempts/{attemptId} {
+      allow get: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && isValidId(attemptId) &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.keys().hasAll(['id', 'userId', 'scorePercentage', 'completedAt']);
+      allow update: if false; // Immutable attempts
+      allow delete: if isAdmin();
+    }
+
+    // Personalized Roadmaps Rules
+    match /roadmaps/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      allow create, update: if isOwner(userId) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Curated Questions (Public read, admin write)
+    match /questions/{questionId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Curated Resources (Public read, admin write)
+    match /resources/{resourceId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}

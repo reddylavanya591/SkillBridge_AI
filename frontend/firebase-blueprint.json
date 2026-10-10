@@ -1,0 +1,73 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Student or Admin user profile",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "maxLength": 256 },
+        "name": { "type": "string", "maxLength": 128 },
+        "role": { "type": "string", "enum": ["student", "admin"] },
+        "educationLevel": { "type": "string", "maxLength": 100 },
+        "course": { "type": "string", "maxLength": 100 },
+        "targetRole": { "type": "string", "maxLength": 100 },
+        "experienceLevel": { "type": "string", "enum": ["Beginner", "Intermediate", "Advanced"] },
+        "weeklyHours": { "type": "number" },
+        "isProfileComplete": { "type": "boolean" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "email", "name", "role", "targetRole"]
+    },
+    "AssessmentAttempt": {
+      "title": "AssessmentAttempt",
+      "description": "Immutable record of an individual test attempt",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "domain": { "type": "string", "maxLength": 100 },
+        "totalQuestions": { "type": "number" },
+        "correctAnswersCount": { "type": "number" },
+        "scorePercentage": { "type": "number" },
+        "timeSpentSeconds": { "type": "number" },
+        "maxTimeSeconds": { "type": "number" },
+        "startedAt": { "type": "string" },
+        "completedAt": { "type": "string" }
+      },
+      "required": ["id", "userId", "scorePercentage", "completedAt"]
+    },
+    "PersonalizedRoadmap": {
+      "title": "PersonalizedRoadmap",
+      "description": "Personalized roadmap generated for student",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "careerRole": { "type": "string", "maxLength": 100 },
+        "completionPercentage": { "type": "number" },
+        "totalTasks": { "type": "number" },
+        "completedTasks": { "type": "number" },
+        "generatedBy": { "type": "string", "enum": ["gemini-ai", "rule-engine-fallback"] },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "userId", "careerRole", "completionPercentage"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Student profile documents"
+    },
+    "/attempts/{attemptId}": {
+      "schema": "AssessmentAttempt",
+      "description": "Immutable assessment attempt history records"
+    },
+    "/roadmaps/{userId}": {
+      "schema": "PersonalizedRoadmap",
+      "description": "Student roadmap progress documents"
+    }
+  }
+}

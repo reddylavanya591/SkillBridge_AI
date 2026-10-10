@@ -1,0 +1,6 @@
+{
+  "name": "SkillBridge AI",
+  "description": "Assess Skills. Find Gaps. Build the Right Roadmap. Full-stack AI career readiness platform with interactive assessments, gap analysis, and personalized roadmaps.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
