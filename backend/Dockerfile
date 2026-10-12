@@ -1,4 +1,4 @@
-```dockerfile
+
 # Stage 1: Build the application
 FROM maven:3.9-eclipse-temurin-21 AS build
 
@@ -22,4 +22,3 @@ ENV PORT=8080
 EXPOSE 8080
 
 ENTRYPOINT ["sh", "-c", "java -Dserver.port=${PORT:-8080} -jar app.jar"]
-```
